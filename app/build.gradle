@@ -1,0 +1,85 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/public' }
+
+    }
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.+'
+    }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.0"
+
+    defaultConfig {
+        applicationId "com.boilerplate.android"
+        minSdkVersion 15
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file('keystore.debug.jks')
+            storePassword 'AndroidBoilerplate'
+            keyAlias 'androidboilerplate'
+            keyPassword 'AndroidBoilerplate'
+        }
+        release {
+            storeFile file('keystore.debug.jks')
+            storePassword 'AndroidBoilerplate'
+            keyAlias 'androidboilerplate'
+            keyPassword 'AndroidBoilerplate'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            // NOTE:  Enable Crashlytics after filling out your Fabric's API key
+            ext.enableCrashlytics = false
+
+            signingConfig signingConfigs.debug
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:25.0.1'
+    compile 'com.android.support:design:25.0.1'
+    compile 'com.android.support:support-v4:25.0.1'
+
+    compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.5@aar') {
+        transitive = true;
+    }
+
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.2.2', {
+        exclude group: 'com.android.support'
+        exclude module: 'support-annotations'
+        exclude module: 'appcompat-v7'
+        exclude module: 'recycler-v7'
+    })
+    androidTestCompile('tools.fastlane:screengrab:0.5.6', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+
+    testCompile 'junit:junit:4.12'
+}

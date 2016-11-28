@@ -1,0 +1,100 @@
+# Customise this file, documentation can be found here:
+# https://github.com/fastlane/fastlane/tree/master/fastlane/docs
+# All available actions: https://github.com/fastlane/fastlane/blob/master/fastlane/docs/Actions.md
+# can also be listed using the `fastlane actions` command
+
+# Change the syntax highlighting to Ruby
+# All lines starting with a # are ignored when running `fastlane`
+
+# If you want to automatically update fastlane if a new version is available:
+# update_fastlane
+
+# This is the minimum version number required.
+# Update this, if you use features of a newer version
+fastlane_version "1.110.0"
+
+default_platform :android
+
+platform :android do
+  before_all do
+    ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
+
+    # Crashlytics
+    ENV["CRASHLYTICS_TOKEN"] = "CRASHLYTICS_TOKEN"
+    ENV["CRASHLYTICS_SECRET"] = "CRASHLYTICS_SECRET"
+  end
+
+  desc "Runs all the tests"
+  private_lane :tests do
+    gradle(task: "test")
+  end
+
+  desc "Gradle Assemble by type"
+  private_lane :build do |options|
+    gradle(task: 'clean')
+    gradle(task: 'assemble', build_type: options[:type])
+  end
+
+  desc "Take Screenshots from device emulator"
+  lane :screenshots do
+    gradle(task: 'assemble', build_type: 'Debug')
+    gradle(task: 'assemble', build_type: 'AndroidTest')
+
+    screengrab
+  end
+
+  desc "Submit a new Beta Build to Crashlytics Beta"
+  lane :beta do |options|
+   
+    if options[:group]
+      build(type: 'Debug')
+      crashlytics(
+        api_token: ENV["CRASHLYTICS_TOKEN"],
+        build_secret: ENV["CRASHLYTICS_SECRET"],
+        notifications: true,
+        notes_path: 'fastlane/CrashlyticsFile'
+      )
+    else
+      raise ArgumentError, 'Crashlytics Beta group is required. Use: fastlane beta group:[GROUP]'
+    end
+  end
+
+  desc "Deploy a new version to the Google Play"
+  lane :store do
+    tests
+   
+    build(type: 'Release')
+
+    supply
+  end
+
+  after_all do |lane|
+    
+    # SLACK: Configure your Slack success action
+    
+    # slack(
+    #   message: "App deploy success",
+    #   channel: '#mobile',
+    #   success: true
+    # )
+  end
+
+  error do |lane, exception|
+    
+    # SLACK: Configure your Slack error action
+
+    # slack(
+    #   message: "App deploy error",
+    #   channel: '#mobile',
+    #   success: false,
+    #   message: exception.message
+    # )
+  end
+end
+
+
+# More information about multiple platforms in fastlane: https://github.com/fastlane/fastlane/blob/master/fastlane/docs/Platforms.md
+# All available actions: https://github.com/fastlane/fastlane/blob/master/fastlane/docs/Actions.md
+
+# fastlane reports which actions are used
+# No personal data is sent or shared. Learn more at https://github.com/fastlane/enhancer
