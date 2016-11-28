@@ -1,2 +1,2 @@
 json_key_file "google-play-api-key.json" # Path to the json secret file - Follow https://github.com/fastlane/supply#setup to get one
-package_name "oi.net.br.digital" # e.g. com.krausefx.app
+package_name "com.boilerplate.android" # e.g. com.krausefx.app
